@@ -38,6 +38,31 @@ app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
 }));
 //end body-parser configuration
 
+var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
+var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
+
+var server = app.listen(server_port, server_ip_address, function() {
+    var host = server.address().address;
+    var port = server.address().port;
+
+    console.log('Server started at host: ' + host);
+    console.log('Server started at port: ' + port);
+
+    var j = schedule.scheduleJob('*/1 * * * *', function() {
+        getExchangeList()
+            .then(function(data) {
+                getAllCoinsFromAPI()
+                    .then(function(data) {
+                        matchCoins();
+                    }).catch(function(error) {
+                        throw err;
+                    });
+            }).catch(function(error) {
+                throw err;
+            });
+    });
+});
+
 var exchangeList = {};
 var exchangeArray = [];
 
@@ -201,17 +226,3 @@ function matchCoins() {
     //     });
     // }
 }
-
-var j = schedule.scheduleJob('*/1 * * * *', function() {
-    getExchangeList()
-        .then(function(data) {
-            getAllCoinsFromAPI()
-                .then(function(data) {
-                    matchCoins();
-                }).catch(function(error) {
-                    throw err;
-                });
-        }).catch(function(error) {
-            throw err;
-        });
-});
