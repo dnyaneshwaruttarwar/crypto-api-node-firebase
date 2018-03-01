@@ -48,7 +48,7 @@ var server = app.listen(server_port, server_ip_address, function() {
     console.log('Server started at host: ' + host);
     console.log('Server started at port: ' + port);
 
-    var j = schedule.scheduleJob('*/1 * * * *', function() {
+    var j = schedule.scheduleJob('*/10 * * * *', function() {
         getExchangeList()
             .then(function(data) {
                 getAllCoinsFromAPI()
