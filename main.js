@@ -49,6 +49,7 @@ var server = app.listen(server_port, server_ip_address, function() {
     console.log('Server started at port: ' + port);
 
     var j = schedule.scheduleJob('*/10 * * * *', function() {
+        console.log('Job Started at: ' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString());
         getExchangeList()
             .then(function(data) {
                 getAllCoinsFromAPI()
@@ -97,7 +98,6 @@ function getExchangeList() {
 
 function getCoinsFromAPI(exchange, key) {
     return new Promise(function(resolve, reject) {
-        console.log(exchange.exchangeUrl);
         var Request = unirest.get(exchange.exchangeUrl);
         Request.header('Content-Type', 'application/json').end(function(response) {
             exchangeList[key].coinsFromAPI = {};
@@ -194,14 +194,16 @@ function matchCoins() {
             }
         }
     }
-    var isNewCoinAdded = false;
+
     var mailBody = '';
+    mailOptions.subject = 'Alert: New Coin Added';
     for (var exeKey in exchangeList) {
         if (Object.keys(exchangeList[exeKey].newCoins).length > 0) {
             mailBody = '';
             mailBody = 'New Coin Added On Exchange \n \t' + exeKey + '\n \t\t';
             mailBody = mailBody + Object.keys(exchangeList[exeKey].newCoins);
             mailOptions.text = mailBody;
+            mailOptions.subject = mailOptions.subject + ': ' + Object.keys(exchangeList[exeKey].newCoins)
             transporter.sendMail(mailOptions, function(error, info) {
                 if (error) {
                     console.log(error);
@@ -211,18 +213,7 @@ function matchCoins() {
             });
             var refCoin = db.ref('/exchange/' + exeKey + '/coins');
             refCoin.update(exchangeList[exeKey].newCoins);
-            isNewCoinAdded = true;
         }
     }
     console.log('done schedule');
-    // if (isNewCoinAdded) {
-    //     mailOptions.text = mailBody;
-    //     transporter.sendMail(mailOptions, function(error, info) {
-    //         if (error) {
-    //             console.log(error);
-    //         } else {
-    //             console.log('Email sent: ' + info.response);
-    //         }
-    //     });
-    // }
 }
