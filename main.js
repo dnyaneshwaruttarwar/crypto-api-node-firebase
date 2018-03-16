@@ -1,12 +1,10 @@
 var http = require("http");
 var express = require('express');
 var app = express();
-var mysql = require('mysql');
 var bodyParser = require('body-parser');
 var schedule = require('node-schedule');
 var nodemailer = require('nodemailer');
 var unirest = require('unirest');
-var squel = require('squel');
 var Promise = require('promise');
 var escape = require('escape-html');
 var firebase = require('firebase-admin');
@@ -62,6 +60,23 @@ var server = app.listen(server_port, server_ip_address, function() {
                 throw err;
             });
     });
+
+    var dayJob = schedule.scheduleJob('00 00 12 * * 1-7', function() {
+        var mailOptionsForJobStatus = {
+            from: 'danny.uttarwar.crypto@gmail.com',
+            to: 'uttarwardnyaneshwar@gmail.com ,sakteparpushkar704@gmail.com',
+            subject: 'Job is running',
+            text: ''
+        };
+        transporter.sendMail(mailOptionsForJobStatus, function(error, info) {
+            if (error) {
+                console.log(error);
+            } else {
+                console.log('Email sent: ' + info.response);
+            }
+        });
+    });
+
 });
 
 var exchangeList = {};
@@ -103,46 +118,53 @@ function getCoinsFromAPI(exchange, key) {
             exchangeList[key].coinsFromAPI = {};
             var i = 0;
             var list = [];
+            var format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
             if (exchange.name === 'bittrex' && exchange.isActive) {
                 list = response.body.result;
                 for (i = 0, iLen = list.length; i < iLen; i++) {
-                    exchangeList[key].coinsFromAPI[list[i].Currency] = {};
-                    exchangeList[key].coinsFromAPI[list[i].Currency].exchangeName = exchange.name;
-                    exchangeList[key].coinsFromAPI[list[i].Currency].name = list[i].CurrencyLong;
-                    exchangeList[key].coinsFromAPI[list[i].Currency].code = list[i].Currency;
-                    exchangeList[key].coinsFromAPI[list[i].Currency].pair = '';
-                    exchangeList[key].coinsFromAPI[list[i].Currency].baseName = list[i].CoinType;
-                    exchangeList[key].coinsFromAPI[list[i].Currency].baseCode = '';
+                    if (!format.test(list[i].Currency)) {
+                        exchangeList[key].coinsFromAPI[list[i].Currency] = {};
+                        exchangeList[key].coinsFromAPI[list[i].Currency].exchangeName = exchange.name;
+                        exchangeList[key].coinsFromAPI[list[i].Currency].name = list[i].CurrencyLong;
+                        exchangeList[key].coinsFromAPI[list[i].Currency].code = list[i].Currency;
+                        exchangeList[key].coinsFromAPI[list[i].Currency].pair = '';
+                        exchangeList[key].coinsFromAPI[list[i].Currency].baseName = list[i].CoinType;
+                        exchangeList[key].coinsFromAPI[list[i].Currency].baseCode = '';
+                    }
                 }
             } else if (exchange.name === 'kucoin' && exchange.isActive) {
                 list = response.body.data;
                 for (i = 0, iLen = list.length; i < iLen; i++) {
-                    exchangeList[key].coinsFromAPI[list[i].coinType] = {};
-                    exchangeList[key].coinsFromAPI[list[i].coinType].exchangeName = exchange.name;
-                    exchangeList[key].coinsFromAPI[list[i].coinType].name = '';
-                    exchangeList[key].coinsFromAPI[list[i].coinType].code = list[i].coinType;
-                    exchangeList[key].coinsFromAPI[list[i].coinType].pair = list[i].symbol;
-                    exchangeList[key].coinsFromAPI[list[i].coinType].baseName = '';
-                    exchangeList[key].coinsFromAPI[list[i].coinType].baseCode = list[i].coinTypePair;
+                    if (!format.test(list[i].coinType)) {
+                        exchangeList[key].coinsFromAPI[list[i].coinType] = {};
+                        exchangeList[key].coinsFromAPI[list[i].coinType].exchangeName = exchange.name;
+                        exchangeList[key].coinsFromAPI[list[i].coinType].name = '';
+                        exchangeList[key].coinsFromAPI[list[i].coinType].code = list[i].coinType;
+                        exchangeList[key].coinsFromAPI[list[i].coinType].pair = list[i].symbol;
+                        exchangeList[key].coinsFromAPI[list[i].coinType].baseName = '';
+                        exchangeList[key].coinsFromAPI[list[i].coinType].baseCode = list[i].coinTypePair;
+                    }
                 }
             } else if (exchange.name === 'binance' && exchange.isActive) {
                 if (response && response.body && response.body.data) {
                     list = response.body.data;
                     for (i = 0, iLen = list.length; i < iLen; i++) {
-                        exchangeList[key].coinsFromAPI[list[i].baseAsset] = {};
-                        exchangeList[key].coinsFromAPI[list[i].baseAsset].exchangeName = exchange.name;
-                        exchangeList[key].coinsFromAPI[list[i].baseAsset].name = list[i].baseAssetName;
-                        exchangeList[key].coinsFromAPI[list[i].baseAsset].code = list[i].baseAsset;
-                        exchangeList[key].coinsFromAPI[list[i].baseAsset].pair = list[i].symbol;
-                        exchangeList[key].coinsFromAPI[list[i].baseAsset].baseName = list[i].quoteAssetName;
-                        exchangeList[key].coinsFromAPI[list[i].baseAsset].baseCode = list[i].quoteAsset;
+                        if (!format.test(list[i].baseAsset)) {
+                            exchangeList[key].coinsFromAPI[list[i].baseAsset] = {};
+                            exchangeList[key].coinsFromAPI[list[i].baseAsset].exchangeName = exchange.name;
+                            exchangeList[key].coinsFromAPI[list[i].baseAsset].name = list[i].baseAssetName;
+                            exchangeList[key].coinsFromAPI[list[i].baseAsset].code = list[i].baseAsset;
+                            exchangeList[key].coinsFromAPI[list[i].baseAsset].pair = list[i].symbol;
+                            exchangeList[key].coinsFromAPI[list[i].baseAsset].baseName = list[i].quoteAssetName;
+                            exchangeList[key].coinsFromAPI[list[i].baseAsset].baseCode = list[i].quoteAsset;
+                        }
                     }
                 }
             } else if (exchange.name === 'cryptopia' && exchange.isActive) {
                 if (response && response.body && response.body.Data) {
                     list = response.body.Data;
                     for (i = 0, iLen = list.length; i < iLen; i++) {
-                        if (list[i].BaseSymbol == 'BTC') {
+                        if (list[i].BaseSymbol == 'BTC' && !format.test(list[i].Symbol)) {
                             exchangeList[key].coinsFromAPI[list[i].Symbol] = {};
                             exchangeList[key].coinsFromAPI[list[i].Symbol].exchangeName = exchange.name;
                             exchangeList[key].coinsFromAPI[list[i].Symbol].name = list[i].Currency;
@@ -196,14 +218,14 @@ function matchCoins() {
     }
 
     var mailBody = '';
-    mailOptions.subject = 'Alert: New Coin Added';
+    mailOptions.subject = 'Alert: New Coin Added on: ';
     for (var exeKey in exchangeList) {
         if (Object.keys(exchangeList[exeKey].newCoins).length > 0) {
             mailBody = '';
             mailBody = 'New Coin Added On Exchange \n \t' + exeKey + '\n \t\t';
             mailBody = mailBody + Object.keys(exchangeList[exeKey].newCoins);
             mailOptions.text = mailBody;
-            mailOptions.subject = mailOptions.subject + ': ' + Object.keys(exchangeList[exeKey].newCoins)
+            mailOptions.subject = mailOptions.subject + exeKey + ': ' + Object.keys(exchangeList[exeKey].newCoins);
             transporter.sendMail(mailOptions, function(error, info) {
                 if (error) {
                     console.log(error);
