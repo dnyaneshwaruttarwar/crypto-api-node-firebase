@@ -9,6 +9,28 @@ var Promise = require('promise');
 var escape = require('escape-html');
 var firebase = require('firebase-admin');
 
+
+// Below Credentials are of test account
+
+// var serviceAccount = {
+//     "type": "service_account",
+//     "project_id": "crypto-app-ee3dc",
+//     "private_key_id": "cd44ddb29b75383b0f85666e5698654275cc7998",
+//     "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCqzi7FxDf7Pz90\nS3Yqk2aRmMjo3nVw9+sHAsnqtktQPSjmW6JciEWeABt66oRdcHCKg0RHgZ75IDG5\nWQpneQ5dE1a7haHeYbz7SnAb+0LjofjC1QTBAcG3QM2+KyixHahxHedMgvN/3sNZ\nYL+YMZgt7fwwDgzqSzofAkcVOXAl4Jdc76B2fXRyAgCjlwvmjan8SR900WiYvnv2\ncjbl6BiWfpD0M4/VJXQplbIFLHT6Aos6JBW505jgX9A4wYzsNGgx2c9KOpllLaaU\nqWdfe2mom5/tM2PYNZ6NJcLqfSpvhNdQbC1jRsTZx6ZNGyveLJPFQT0ZYSGvEsLf\n/EAOtThHAgMBAAECggEABdCFCRh362aoy1WyTRq9eCFiXYMNLm5SIuf2ZbYU9ENQ\nvB7MdSfybsGELfgDz4Z/Xke/sEt6VPLCnpOoZgNZ+NMqtbGD5CUhoNBU5q70BPnD\nlSZZRhTAOnPLTTj85qKi1E73S8R9c5HqxoUjoJO3oYCjgCNKT0OGU/3o25Eb/z4K\nvvdKLbdh2yoJWuR7htwjrDykiKlIMLYlNEvANuQ1kGeop3t51prhob7gwgCsdeHW\nw8dGs0+Lqj/y3m8DnquOWgEtGtYmMOuzSJezNzv4uD1qPjCjiLx5ptY5t6i/ncCC\nw+lok+WgnXtLRpgbi8jFSbeVJorgfUj87cyGTQnN4QKBgQDj1L6/fk68ZXXo2RLt\n/EPDYcG340mORywxHZJqZJF9kuspNEm21mu3jidPLzTdtxU6j43mJPJU9eW2h5Z/\ncpKe2W/AvuaZ0o817v51qCC13XzKx8HX8/DqgvCQxWFWN/6qdXv/WrZULiERTcpf\nGb1mxCLwYkCXRNJVaMd98K+edwKBgQC/7Hm59HI9NRCuO3INslSgOH++Ktp8zQAd\nW1iu8Q2TBqX8yhxqBo97lqsHgtdLPDzCp156jv/nzDpm/My5hEiC05d75X1rMnk9\nF5z3k2rFq29UVLuW+qSWSN+lXSqZhhxvIV9tkW79c8eKzDWWu+gcT2P3VFO2za6s\nty7HrN6YsQKBgQCJLXt8iWyW+vA3txwytwWGCsI9GlkblbcCC7Aw50TCu0dkk9se\nf5Rz/N+mSeIm7SmXDQB/ZheTGEurz4/KRQ4LHxiukUL/s0wPSUtlREoNtsKAxi3s\n/TA9w4Fdabrl0uk/cWWrps7JeMzoQlJrWHA2BDqVSlNhwUpzqpcTOWxEmQKBgAK8\n9fOgOC0FX8qMkJD/dVOf2rq0088qAZFppzc/uyjY1G9p1sPwegWSXbhKtpWdM2S3\njJKFDcOZ10921djjuUEckbGz0XlBDBfCCXxCvyg4zOrQFqkNxGFcgsxSKvRrxGYV\nfM4MYB//kd46EZ2n6qTUwSFbM6KNBqvyJRm2LqrRAoGAHxj0HpITnRcWFZgDutV3\n73j4JKPVf98/RdLcAR5YQwF8j3PkFIA8cVqwRVlcX9FNTDipeZ8E3YoIS3Buecwe\nuXn5/Dq1DxYouoFKd4GaAXD2Vedqsc1FJJLQ38vV58K3+vF8ZqGo1zc6bw8kiQwK\n/O3Ddt1JPfIjqJlSSm16Qew=\n-----END PRIVATE KEY-----\n",
+//     "client_email": "firebase-adminsdk-mqkf5@crypto-app-ee3dc.iam.gserviceaccount.com",
+//     "client_id": "109793800077962320622",
+//     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+//     "token_uri": "https://accounts.google.com/o/oauth2/token",
+//     "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+//     "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-mqkf5%40crypto-app-ee3dc.iam.gserviceaccount.com"
+// };
+
+// firebase.initializeApp({
+//     credential: firebase.credential.cert(serviceAccount),
+//     databaseURL: "https://crypto-app-ee3dc.firebaseio.com"
+// });
+
+
 var serviceAccount = {
     "type": "service_account",
     "project_id": "crypto-api-9630b",
@@ -48,6 +70,7 @@ var server = app.listen(server_port, server_ip_address, function() {
 
     var j = schedule.scheduleJob('*/2 * * * *', function() {
         console.log('Job Started at: ' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString());
+        updateStepSizeForBinance();
         getExchangeList()
             .then(function(data) {
                 getAllCoinsFromAPI()
@@ -97,6 +120,37 @@ var mailOptions = {
     subject: 'Alert: New Coin Added',
     text: 'That was easy!'
 };
+
+function updateStepSizeForBinance() {
+    console.log('update binance step size: start');
+    getExchangeList()
+        .then(function(data) {
+            var list = data;
+            var Request = unirest.get('https://www.binance.com/api/v1/exchangeInfo');
+            Request.header('Content-Type', 'application/json').end(function(exchangeInfo) {
+                if (exchangeInfo && exchangeInfo.body && exchangeInfo.body.symbols && list) {
+                    var symbols = exchangeInfo.body.symbols;
+                    console.log('update binance step size: end');
+                    for (var coinKey in list['binance'].coins) {
+                        var market = coinKey + 'BTC';
+                        for (var obj of symbols) {
+                            if (obj.symbol === market) {
+                                for (var filter of obj.filters) {
+                                    if (filter.filterType == "LOT_SIZE") {
+                                        list['binance'].coins[coinKey].stepSize = filter.stepSize;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    var refCoin = db.ref('/exchange/binance/coins');
+                    refCoin.update(list['binance'].coins);
+                }
+            });
+        }).catch(function(error) {
+            throw err;
+        });
+}
 
 function getExchangeList() {
     return new Promise(function(resolve, reject) {
