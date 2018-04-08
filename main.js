@@ -229,6 +229,25 @@ function getCoinsFromAPI(exchange, key) {
                         }
                     }
                 }
+            } else if (exchange.name === 'yobit' && exchange.isActive) {
+                if (response && response.body) {
+                    var body = JSON.parse(response.body);
+                    if (body) {
+                        var list = body.pairs;
+                        for (var pairKey in list) {
+                            var splitList = pairKey.split('_');
+                            if (splitList[1] == 'btc') {
+                                exchangeList[key].coinsFromAPI[splitList[0].toUpperCase()] = {};
+                                exchangeList[key].coinsFromAPI[splitList[0].toUpperCase()].exchangeName = exchange.name;
+                                exchangeList[key].coinsFromAPI[splitList[0].toUpperCase()].name = splitList[0].toUpperCase();
+                                exchangeList[key].coinsFromAPI[splitList[0].toUpperCase()].code = splitList[0].toUpperCase();
+                                exchangeList[key].coinsFromAPI[splitList[0].toUpperCase()].pair = pairKey;
+                                exchangeList[key].coinsFromAPI[splitList[0].toUpperCase()].baseName = 'bitcoin';
+                                exchangeList[key].coinsFromAPI[splitList[0].toUpperCase()].baseCode = splitList[1].toUpperCase();
+                            }
+                        }
+                    }
+                }
             }
             resolve(response);
         });
