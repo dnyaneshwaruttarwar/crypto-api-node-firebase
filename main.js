@@ -67,9 +67,9 @@ var server = app.listen(server_port, server_ip_address, function() {
 
     console.log('Server started at host: ' + host);
     console.log('Server started at port: ' + port);
-
     var j = schedule.scheduleJob('*/2 * * * *', function() {
         console.log('Job Started at: ' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString());
+        getLowestRateCoin();
         updateStepSizeForBinance();
         getExchangeList()
             .then(function(data) {
@@ -120,6 +120,57 @@ var mailOptions = {
     subject: 'Alert: New Coin Added',
     text: 'That was easy!'
 };
+
+function getLowestRateCoin() {
+    Request = unirest.get('https://bittrex.com/api/v1.1/public/getmarketsummaries');
+    Request.header('Content-Type', 'application/json').end(function(data) {
+        var coinList = data.body.result;
+        var newCoinList = [];
+        for (var i = 0; i < coinList.length; i++) {
+            var element = coinList[i];
+            var splitCoin = element.MarketName.split('-');
+            if (splitCoin[0] == 'BTC') {
+                element.VolumeInBtc = element.Volume * element.Last;
+                if (element.VolumeInBtc > 50) {
+                    element.CoinName = splitCoin[1];
+                    var maxPercentPriceDiff = (element.Low + ((element.Low * 10) / 100)).toFixed(8);
+                    maxPercentPriceDiff = Number.parseFloat(maxPercentPriceDiff);
+                    if (maxPercentPriceDiff >= element.High) {
+                        element.NearAboutLowPrice = (element.Low + ((element.Low * 1) / 100)).toFixed(8);
+                        element.NearAboutLowPrice = Number.parseFloat(element.NearAboutLowPrice);
+                        if (element.Last <= element.NearAboutLowPrice) {
+                            newCoinList.push(element);
+                            console.log("Name: " + element.CoinName + " High: " + element.High.toString() + " Low: " + element.Low.toString() + " Last: " + element.Last.toString());
+                        }
+                    }
+                }
+            }
+        }
+        var mailOptions1 = {
+            from: 'danny.uttarwar.crypto@gmail.com',
+            to: 'dnyaneshwar.uttarwar@zconsolutions.com, uttarwardnyaneshwar@gmail.com ',
+            subject: 'Alert: New Coin Added',
+            text: 'That was easy!'
+        };
+        if (newCoinList.length > 0) {
+            var mailBody = '';
+            mailOptions1.subject = 'Low Rate Coin: ';
+            mailBody = '';
+            for (var j = 0; j < newCoinList.length; j++) {
+                mailOptions1.subject += newCoinList[j].CoinName + ", ";
+                mailBody += "Name: " + newCoinList[j].CoinName + " High: " + newCoinList[j].High.toString() + " Low: " + newCoinList[j].Low.toString() + " Last: " + newCoinList[j].Last.toString() + "\n \n";
+            }
+            mailOptions1.text = mailBody;
+            transporter.sendMail(mailOptions1, function(error, info) {
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log('Email sent: ' + info.response);
+                }
+            });
+        }
+    });
+}
 
 function updateStepSizeForBinance() {
     console.log('update binance step size: start');
