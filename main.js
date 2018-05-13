@@ -69,7 +69,6 @@ var server = app.listen(server_port, server_ip_address, function() {
     console.log('Server started at port: ' + port);
     var j = schedule.scheduleJob('*/2 * * * *', function() {
         console.log('Job Started at: ' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString());
-        getLowestRateCoin();
         updateStepSizeForBinance();
         getExchangeList()
             .then(function(data) {
@@ -84,10 +83,15 @@ var server = app.listen(server_port, server_ip_address, function() {
             });
     });
 
+    var k = schedule.scheduleJob('*/5 * * * *', function() {
+        console.log('Lowest Price Job Started at: ' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString());
+        getLowestRateCoin();
+    });
+
     var dayJob = schedule.scheduleJob('00 00 12 * * 1-7', function() {
         var mailOptionsForJobStatus = {
             from: 'danny.uttarwar.crypto@gmail.com',
-            to: 'uttarwardnyaneshwar@gmail.com ,sakteparpushkar704@gmail.com',
+            to: 'danny.uttarwar.crypto@gmail.com ,sakteparpushkar704@gmail.com',
             subject: 'Job is running',
             text: ''
         };
@@ -116,7 +120,7 @@ var transporter = nodemailer.createTransport({
 
 var mailOptions = {
     from: 'danny.uttarwar.crypto@gmail.com',
-    to: 'dnyaneshwar.uttarwar@zconsolutions.com, uttarwardnyaneshwar@gmail.com ,sakteparpushkar704@gmail.com',
+    to: 'dnyaneshwar.uttarwar@zconsolutions.com, danny.uttarwar.crypto@gmail.com ,sakteparpushkar704@gmail.com',
     subject: 'Alert: New Coin Added',
     text: 'That was easy!'
 };
@@ -148,7 +152,7 @@ function getLowestRateCoin() {
         }
         var mailOptions1 = {
             from: 'danny.uttarwar.crypto@gmail.com',
-            to: 'dnyaneshwar.uttarwar@zconsolutions.com, uttarwardnyaneshwar@gmail.com ',
+            to: 'danny.uttarwar.crypto@gmail.com ',
             subject: 'Alert: New Coin Added',
             text: 'That was easy!'
         };
