@@ -85,7 +85,7 @@ var server = app.listen(server_port, server_ip_address, function() {
 
     var k = schedule.scheduleJob('*/5 * * * *', function() {
         console.log('Lowest Price Job Started at: ' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString());
-        getLowestRateCoin();
+        // getLowestRateCoin();
     });
 
     var dayJob = schedule.scheduleJob('00 00 12 * * 1-7', function() {
@@ -137,9 +137,9 @@ function getLowestRateCoin() {
                 element.VolumeInBtc = element.Volume * element.Last;
                 if (element.VolumeInBtc > 50) {
                     element.CoinName = splitCoin[1];
-                    var maxPercentPriceDiff = (element.Low + ((element.Low * 10) / 100)).toFixed(8);
+                    var maxPercentPriceDiff = (element.Low + ((element.Low * 8) / 100)).toFixed(8);
                     maxPercentPriceDiff = Number.parseFloat(maxPercentPriceDiff);
-                    if (maxPercentPriceDiff >= element.High) {
+                    if (element.High >= maxPercentPriceDiff) {
                         element.NearAboutLowPrice = (element.Low + ((element.Low * 1) / 100)).toFixed(8);
                         element.NearAboutLowPrice = Number.parseFloat(element.NearAboutLowPrice);
                         if (element.Last <= element.NearAboutLowPrice) {
@@ -152,7 +152,7 @@ function getLowestRateCoin() {
         }
         var mailOptions1 = {
             from: 'danny.uttarwar.crypto@gmail.com',
-            to: 'danny.uttarwar.crypto@gmail.com ',
+            to: 'danny.uttarwar.crypto@gmail.com',
             subject: 'Alert: New Coin Added',
             text: 'That was easy!'
         };
@@ -165,13 +165,13 @@ function getLowestRateCoin() {
                 mailBody += "Name: " + newCoinList[j].CoinName + " High: " + newCoinList[j].High.toString() + " Low: " + newCoinList[j].Low.toString() + " Last: " + newCoinList[j].Last.toString() + "\n \n";
             }
             mailOptions1.text = mailBody;
-            transporter.sendMail(mailOptions1, function(error, info) {
-                if (error) {
-                    console.log(error);
-                } else {
-                    console.log('Email sent: ' + info.response);
-                }
-            });
+            // transporter.sendMail(mailOptions1, function(error, info) {
+            //     if (error) {
+            //         console.log(error);
+            //     } else {
+            //         console.log('Email sent: ' + info.response);
+            //     }
+            // });
         }
     });
 }
