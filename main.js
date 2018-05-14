@@ -70,6 +70,7 @@ var server = app.listen(server_port, server_ip_address, function() {
     var j = schedule.scheduleJob('*/2 * * * *', function() {
         console.log('Job Started at: ' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString());
         updateStepSizeForBinance();
+        getLowestRateCoin();
         getExchangeList()
             .then(function(data) {
                 getAllCoinsFromAPI()
@@ -83,10 +84,9 @@ var server = app.listen(server_port, server_ip_address, function() {
             });
     });
 
-    var k = schedule.scheduleJob('*/5 * * * *', function() {
-        console.log('Lowest Price Job Started at: ' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString());
-        getLowestRateCoin();
-    });
+    // var k = schedule.scheduleJob('*/1 * * * *', function() {
+    //     console.log('Lowest Price Job Started at: ' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString());
+    // });
 
     var dayJob = schedule.scheduleJob('00 00 12 * * 1-7', function() {
         var mailOptionsForJobStatus = {
@@ -108,7 +108,7 @@ var server = app.listen(server_port, server_ip_address, function() {
 
 var exchangeList = {};
 var exchangeArray = [];
-
+var previousLowPriceCoins = [];
 
 var transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -137,14 +137,13 @@ function getLowestRateCoin() {
                 element.VolumeInBtc = element.Volume * element.Last;
                 if (element.VolumeInBtc > 50) {
                     element.CoinName = splitCoin[1];
-                    var maxPercentPriceDiff = (element.Low + ((element.Low * 8) / 100)).toFixed(8);
+                    var maxPercentPriceDiff = (element.Low + ((element.Low * 9) / 100)).toFixed(8);
                     maxPercentPriceDiff = Number.parseFloat(maxPercentPriceDiff);
                     if (element.High >= maxPercentPriceDiff) {
                         element.NearAboutLowPrice = (element.Low + ((element.Low * 1) / 100)).toFixed(8);
                         element.NearAboutLowPrice = Number.parseFloat(element.NearAboutLowPrice);
                         if (element.Last <= element.NearAboutLowPrice) {
                             newCoinList.push(element);
-                            console.log("Name: " + element.CoinName + " High: " + element.High.toString() + " Low: " + element.Low.toString() + " Last: " + element.Last.toString());
                         }
                     }
                 }
@@ -152,11 +151,35 @@ function getLowestRateCoin() {
         }
         var mailOptions1 = {
             from: 'danny.uttarwar.crypto@gmail.com',
-            to: 'danny.uttarwar.crypto@gmail.com',
+            to: 'dnyaneshwaruttarwar130293@gmail.com',
             subject: 'Alert: New Coin Added',
             text: 'That was easy!'
         };
+
+        function findByMatchingCoins(coin) {
+            for (var k = 0; k < previousLowPriceCoins.length; k++) {
+                if (previousLowPriceCoins[k].CoinName == coin.CoinName) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        var flag = false;
         if (newCoinList.length > 0) {
+            if (previousLowPriceCoins.length == 0) {
+                previousLowPriceCoins = newCoinList;
+                flag = true;
+            } else {
+                for (var j = 0; j < newCoinList.length; j++) {
+                    if (!findByMatchingCoins(newCoinList[j])) {
+                        previousLowPriceCoins = newCoinList;
+                        flag = true;
+                        break;
+                    }
+                }
+            }
+        }
+        if (flag) {
             var mailBody = '';
             mailOptions1.subject = 'Low Rate Coin: ';
             mailBody = '';
