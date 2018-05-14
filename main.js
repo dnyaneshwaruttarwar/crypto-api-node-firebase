@@ -162,7 +162,7 @@ function getLowestRateCoin() {
             mailBody = '';
             for (var j = 0; j < newCoinList.length; j++) {
                 mailOptions1.subject += newCoinList[j].CoinName + ", ";
-                mailBody += "Name: " + newCoinList[j].CoinName + " High: " + newCoinList[j].High.toString() + " Low: " + newCoinList[j].Low.toString() + " Last: " + newCoinList[j].Last.toString() + "\n \n";
+                mailBody += "Name: " + newCoinList[j].CoinName + " High: " + newCoinList[j].High.toString() + " Low: " + newCoinList[j].Low.toString() + " Last: " + newCoinList[j].Last.toString() + " Volume: " + newCoinList[j].VolumeInBtc.toString() + "\n \n";
             }
             mailOptions1.text = mailBody;
             // transporter.sendMail(mailOptions1, function(error, info) {
