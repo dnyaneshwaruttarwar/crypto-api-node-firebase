@@ -165,13 +165,13 @@ function getLowestRateCoin() {
                 mailBody += "Name: " + newCoinList[j].CoinName + " High: " + newCoinList[j].High.toString() + " Low: " + newCoinList[j].Low.toString() + " Last: " + newCoinList[j].Last.toString() + " Volume: " + newCoinList[j].VolumeInBtc.toString() + "\n \n";
             }
             mailOptions1.text = mailBody;
-            // transporter.sendMail(mailOptions1, function(error, info) {
-            //     if (error) {
-            //         console.log(error);
-            //     } else {
-            //         console.log('Email sent: ' + info.response);
-            //     }
-            // });
+            transporter.sendMail(mailOptions1, function(error, info) {
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log('Email sent: ' + info.response);
+                }
+            });
         }
     });
 }
