@@ -85,7 +85,7 @@ var server = app.listen(server_port, server_ip_address, function() {
 
     var k = schedule.scheduleJob('*/5 * * * *', function() {
         console.log('Lowest Price Job Started at: ' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString());
-        // getLowestRateCoin();
+        getLowestRateCoin();
     });
 
     var dayJob = schedule.scheduleJob('00 00 12 * * 1-7', function() {
@@ -163,6 +163,7 @@ function getLowestRateCoin() {
             for (var j = 0; j < newCoinList.length; j++) {
                 mailOptions1.subject += newCoinList[j].CoinName + ", ";
                 mailBody += "Name: " + newCoinList[j].CoinName + " High: " + newCoinList[j].High.toString() + " Low: " + newCoinList[j].Low.toString() + " Last: " + newCoinList[j].Last.toString() + " Volume: " + newCoinList[j].VolumeInBtc.toString() + "\n \n";
+                console.log("Name: " + newCoinList[j].CoinName + " High: " + newCoinList[j].High.toString() + " Low: " + newCoinList[j].Low.toString() + " Last: " + newCoinList[j].Last.toString() + " Volume: " + newCoinList[j].VolumeInBtc.toString() + "\n \n");
             }
             mailOptions1.text = mailBody;
             transporter.sendMail(mailOptions1, function(error, info) {
@@ -172,6 +173,8 @@ function getLowestRateCoin() {
                     console.log('Email sent: ' + info.response);
                 }
             });
+        } else {
+            console.log('No: Low Rate coins');
         }
     });
 }
