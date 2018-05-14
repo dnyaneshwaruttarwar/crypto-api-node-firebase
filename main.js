@@ -151,7 +151,7 @@ function getLowestRateCoin() {
         }
         var mailOptions1 = {
             from: 'danny.uttarwar.crypto@gmail.com',
-            to: 'dnyaneshwaruttarwar130293@gmail.com',
+            to: 'danny.uttarwar.crypto@gmail.com',
             subject: 'Alert: New Coin Added',
             text: 'That was easy!'
         };
