@@ -8,6 +8,7 @@ var unirest = require('unirest');
 var Promise = require('promise');
 var escape = require('escape-html');
 var firebase = require('firebase-admin');
+var moment = require('moment');
 
 
 // Below Credentials are of test account
@@ -137,7 +138,7 @@ function getLowestRateCoin() {
             var splitCoin = element.MarketName.split('-');
             if (splitCoin[0] == 'BTC') {
                 element.VolumeInBtc = element.Volume * element.Last;
-                if (element.VolumeInBtc > 50) {
+                if (element.VolumeInBtc > 150) {
                     element.CoinName = splitCoin[1];
                     var maxPercentPriceDiff = (element.Low + ((element.Low * 9) / 100)).toFixed(8);
                     maxPercentPriceDiff = Number.parseFloat(maxPercentPriceDiff);
@@ -198,6 +199,24 @@ function getLowestRateCoin() {
                     console.log('Email sent: ' + info.response);
                 }
             });
+
+            var analysis = {};
+            analysis.exchange = "Bittrex";
+            analysis.type = "lowRateCoin";
+            analysis.title = mailOptions1.subject;
+            analysis.body = mailBody;
+            analysis.lowRateCoins = [];
+            for (var j = 0; j < newCoinList.length; j++) {
+                var coin = {};
+                coin.coinName = newCoinList[j].CoinName;
+                coin.lowPrice = newCoinList[j].Low;
+                coin.highPrice = newCoinList[j].High;
+                coin.lastPrice = newCoinList[j].Last;
+                coin.volume = newCoinList[j].VolumeInBtc;
+                analysis.lowRateCoins.push(coin);
+            }
+            var refCoin = db.ref('/notifications');
+            refCoin.push(analysis);
         } else {
             console.log('No: Low Rate coins');
         }
@@ -265,10 +284,23 @@ function getLowestRateCoinBinance() {
             var mailBody = '';
             mailOptions1.subject = 'Low Rate Coin: Binance: ';
             mailBody = '';
+            var notificationTitle = "Binance: ";
+            var notificationBody = "";
             for (var j = 0; j < newCoinList.length; j++) {
-                mailOptions1.subject += newCoinList[j].CoinName + ", ";
-                mailBody += "Name: " + newCoinList[j].CoinName + " High: " + newCoinList[j].highPrice.toString() + " Low: " + newCoinList[j].lowPrice.toString() + " Last: " + newCoinList[j].lastPrice.toString() + " Volume: " + newCoinList[j].quoteVolume.toString() + "\n \n";
+                mailOptions1.subject += newCoinList[j].CoinName;
+                notificationTitle += newCoinList[j].CoinName;
+                mailBody += "Name: " + newCoinList[j].CoinName + " High: " + newCoinList[j].highPrice.toString() + " Low: " + newCoinList[j].lowPrice.toString() + " Last: " + newCoinList[j].lastPrice.toString() + " Volume: " + newCoinList[j].quoteVolume.toString();
+                notificationBody += "<b>" + newCoinList[j].CoinName + "</b>: H: " + newCoinList[j].highPrice.toString() + " Lo: " + newCoinList[j].lowPrice.toString() + " La: " + newCoinList[j].lastPrice.toString() + " V: " + Number.parseInt(newCoinList[j].quoteVolume);
                 console.log("Name: " + newCoinList[j].CoinName + " High: " + newCoinList[j].highPrice.toString() + " Low: " + newCoinList[j].lowPrice.toString() + " Last: " + newCoinList[j].lastPrice.toString() + " Volume: " + newCoinList[j].quoteVolume.toString() + "\n \n");
+                if (j !== newCoinList.length - 1) {
+                    mailOptions1.subject += ", ";
+                    notificationTitle += ", ";
+                    mailBody += "\n \n";
+                    notificationBody += "<br/> <br/>";
+                }
+                if (j == newCoinList.length - 1) {
+                    notificationTitle += "  (" + moment().utcOffset("+05:30").format('hh:mm A D MMMM') + ")";
+                }
             }
             mailOptions1.text = mailBody;
             transporter.sendMail(mailOptions1, function(error, info) {
@@ -278,6 +310,24 @@ function getLowestRateCoinBinance() {
                     console.log('Email sent: ' + info.response);
                 }
             });
+            var analysis = {};
+            analysis.exchange = "Binance";
+            analysis.type = "lowRateCoin";
+            analysis.title = notificationTitle;
+            analysis.body = notificationBody;
+            analysis.lowRateCoins = [];
+            for (var j = 0; j < newCoinList.length; j++) {
+                var coin = {};
+                coin.coinName = newCoinList[j].CoinName;
+                coin.lowPrice = newCoinList[j].lowPrice;
+                coin.highPrice = newCoinList[j].highPrice;
+                coin.lastPrice = newCoinList[j].lastPrice;
+                coin.volume = newCoinList[j].volume;
+                analysis.lowRateCoins.push(coin);
+            }
+            var refCoin = db.ref('/notifications');
+            refCoin.push(analysis);
+
         } else {
             console.log('No: Low Rate coins');
         }
