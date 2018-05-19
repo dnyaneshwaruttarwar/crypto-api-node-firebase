@@ -70,7 +70,8 @@ var server = app.listen(server_port, server_ip_address, function() {
     var j = schedule.scheduleJob('*/2 * * * *', function() {
         console.log('Job Started at: ' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString());
         updateStepSizeForBinance();
-        getLowestRateCoin();
+        // getLowestRateCoin();
+        getLowestRateCoinBinance();
         getExchangeList()
             .then(function(data) {
                 getAllCoinsFromAPI()
@@ -109,12 +110,13 @@ var server = app.listen(server_port, server_ip_address, function() {
 var exchangeList = {};
 var exchangeArray = [];
 var previousLowPriceCoins = [];
+var previousLowPriceCoinsBinance = [];
 
 var transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: 'danny.uttarwar.crypto@gmail.com',
-        pass: 'Tech145$'
+        pass: 'Danny@132'
     }
 });
 
@@ -152,7 +154,7 @@ function getLowestRateCoin() {
         var mailOptions1 = {
             from: 'danny.uttarwar.crypto@gmail.com',
             to: 'danny.uttarwar.crypto@gmail.com',
-            subject: 'Alert: New Coin Added',
+            subject: 'Alert: New Coin Added Bittrex',
             text: 'That was easy!'
         };
 
@@ -181,12 +183,92 @@ function getLowestRateCoin() {
         }
         if (flag) {
             var mailBody = '';
-            mailOptions1.subject = 'Low Rate Coin: ';
+            mailOptions1.subject = 'Low Rate Coin: Bittrex';
             mailBody = '';
             for (var j = 0; j < newCoinList.length; j++) {
                 mailOptions1.subject += newCoinList[j].CoinName + ", ";
                 mailBody += "Name: " + newCoinList[j].CoinName + " High: " + newCoinList[j].High.toString() + " Low: " + newCoinList[j].Low.toString() + " Last: " + newCoinList[j].Last.toString() + " Volume: " + newCoinList[j].VolumeInBtc.toString() + "\n \n";
                 console.log("Name: " + newCoinList[j].CoinName + " High: " + newCoinList[j].High.toString() + " Low: " + newCoinList[j].Low.toString() + " Last: " + newCoinList[j].Last.toString() + " Volume: " + newCoinList[j].VolumeInBtc.toString() + "\n \n");
+            }
+            mailOptions1.text = mailBody;
+            transporter.sendMail(mailOptions1, function(error, info) {
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log('Email sent: ' + info.response);
+                }
+            });
+        } else {
+            console.log('No: Low Rate coins');
+        }
+    });
+}
+
+function getLowestRateCoinBinance() {
+    Request = unirest.get('https://www.binance.com/api/v1/ticker/24hr');
+    Request.header('Content-Type', 'application/json').end(function(data) {
+        var coinList = data.body;
+        var newCoinList = [];
+        for (var i = 0; i < coinList.length; i++) {
+            var element = coinList[i];
+            var splitCoin = element.symbol.substr(element.symbol.length - 3);
+            if (splitCoin == 'BTC') {
+                if (element.quoteVolume > 200) {
+                    element.CoinName = element.symbol.replace(splitCoin, '');
+                    element.lowPrice = Number.parseFloat(element.lowPrice);
+                    element.highPrice = Number.parseFloat(element.highPrice);
+                    element.lastPrice = Number.parseFloat(element.lastPrice);
+                    element.quoteVolume = Number.parseFloat(element.quoteVolume);
+                    var maxPercentPriceDiff = (element.lowPrice + ((element.lowPrice * 9) / 100)).toFixed(8);
+                    maxPercentPriceDiff = Number.parseFloat(maxPercentPriceDiff);
+                    if (element.highPrice >= maxPercentPriceDiff) {
+                        element.NearAboutLowPrice = (element.lowPrice + ((element.lowPrice * 1) / 100)).toFixed(8);
+                        element.NearAboutLowPrice = Number.parseFloat(element.NearAboutLowPrice);
+                        if (element.lastPrice <= element.NearAboutLowPrice) {
+                            newCoinList.push(element);
+                        }
+                    }
+                }
+            }
+        }
+        var mailOptions1 = {
+            from: 'danny.uttarwar.crypto@gmail.com',
+            to: 'danny.uttarwar.crypto@gmail.com',
+            subject: 'Alert: New Coin Added Binance',
+            text: 'That was easy!'
+        };
+
+        function findByMatchingCoinsBinance(coin) {
+            for (var k = 0; k < previousLowPriceCoinsBinance.length; k++) {
+                if (previousLowPriceCoinsBinance[k].CoinName == coin.CoinName) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        var flag = false;
+        if (newCoinList.length > 0) {
+            if (previousLowPriceCoinsBinance.length == 0) {
+                previousLowPriceCoinsBinance = newCoinList;
+                flag = true;
+            } else {
+                for (var j = 0; j < newCoinList.length; j++) {
+                    if (!findByMatchingCoinsBinance(newCoinList[j])) {
+                        previousLowPriceCoinsBinance = newCoinList;
+                        flag = true;
+                        break;
+                    }
+                }
+            }
+        }
+        if (flag) {
+            var mailBody = '';
+            mailOptions1.subject = 'Low Rate Coin: Binance: ';
+            mailBody = '';
+            for (var j = 0; j < newCoinList.length; j++) {
+                mailOptions1.subject += newCoinList[j].CoinName + ", ";
+                mailBody += "Name: " + newCoinList[j].CoinName + " High: " + newCoinList[j].highPrice.toString() + " Low: " + newCoinList[j].lowPrice.toString() + " Last: " + newCoinList[j].lastPrice.toString() + " Volume: " + newCoinList[j].quoteVolume.toString() + "\n \n";
+                console.log("Name: " + newCoinList[j].CoinName + " High: " + newCoinList[j].highPrice.toString() + " Low: " + newCoinList[j].lowPrice.toString() + " Last: " + newCoinList[j].lastPrice.toString() + " Volume: " + newCoinList[j].quoteVolume.toString() + "\n \n");
             }
             mailOptions1.text = mailBody;
             transporter.sendMail(mailOptions1, function(error, info) {
