@@ -61,6 +61,7 @@ app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
 
 var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
 var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
+var key = "AAAAOm8japk:APA91bFNamcvNtupkfORJ1IrmigCGiffdhzL0r06XOS-eNhHAe1EZb9h4nbfsNF_nRgoJbIVyZuCHk4w-o1DqTKnIYI54Kqtvz7ZqjeYHXaiuB9PaU8WWNsG4ObfTtAyiPFvD610rEjF";
 
 var server = app.listen(server_port, server_ip_address, function() {
     var host = server.address().address;
@@ -120,6 +121,46 @@ var transporter = nodemailer.createTransport({
         pass: 'Danny@132'
     }
 });
+
+function sendNotification(title, text, destination) {
+    var message = {
+        "to": destination,
+        "notification": {
+            "title": title,
+            "text": text,
+            "sound": "default"
+        }
+    };
+
+    var postData = JSON.stringify(message);
+    var options = {
+        hostname: 'fcm.googleapis.com',
+        path: '/fcm/send',
+        method: 'POST',
+        headers: {
+            'Content-Length': postData.length,
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Authorization': 'key=' + key
+        }
+    };
+
+    var requestHttp = http.request(options, function(res) {
+        res.setEncoding('utf8');
+        res.on('data', function(chunk) {
+            console.log(chunk);
+        });
+        res.on('error', function(e) {
+            console.log('error:' + e.message);
+        });
+    });
+    requestHttp.write(postData);
+    requestHttp.end();
+
+    requestHttp.on('error', function(e) {
+        console.log(e);
+    });
+
+}
 
 var mailOptions = {
     from: 'danny.uttarwar.crypto@gmail.com',
@@ -217,6 +258,11 @@ function getLowestRateCoin() {
             }
             var refCoin = db.ref('/notifications');
             refCoin.push(analysis);
+            // var fcmToken = ["cRK1Fj7-t6U:APA91bHsfitXHO_KuvLkl1R3FVA0-4AO38Ai2Tm2JcJhO5U5elgV4b-bnLq32BJnFbpZ9aEjiId_ayjEyiIr2SX7zFdVBBR5bW9HSqhW9tmFhl-zzE_TBJJOCQnZrUjH7RE3QOh9oFVc"];
+
+            // for (var index = 0; index < fcmToken.length; index++) {
+            //     sendNotification(mailOptions1.subject, mailBody, fcmToken[i]);
+            // }
         } else {
             console.log('No: Low Rate coins');
         }
@@ -303,13 +349,13 @@ function getLowestRateCoinBinance() {
                 }
             }
             mailOptions1.text = mailBody;
-            transporter.sendMail(mailOptions1, function(error, info) {
-                if (error) {
-                    console.log(error);
-                } else {
-                    console.log('Email sent: ' + info.response);
-                }
-            });
+            // transporter.sendMail(mailOptions1, function(error, info) {
+            //     if (error) {
+            //         console.log(error);
+            //     } else {
+            //         console.log('Email sent: ' + info.response);
+            //     }
+            // });
             var analysis = {};
             analysis.exchange = "Binance";
             analysis.type = "lowRateCoin";
@@ -327,7 +373,11 @@ function getLowestRateCoinBinance() {
             }
             var refCoin = db.ref('/notifications');
             refCoin.push(analysis);
+            var fcmToken = ["cRK1Fj7-t6U:APA91bHsfitXHO_KuvLkl1R3FVA0-4AO38Ai2Tm2JcJhO5U5elgV4b-bnLq32BJnFbpZ9aEjiId_ayjEyiIr2SX7zFdVBBR5bW9HSqhW9tmFhl-zzE_TBJJOCQnZrUjH7RE3QOh9oFVc"];
 
+            for (var index = 0; index < fcmToken.length; index++) {
+                sendNotification(notificationTitle, mailBody, fcmToken[index]);
+            }
         } else {
             console.log('No: Low Rate coins');
         }
