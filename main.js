@@ -283,13 +283,14 @@ function getLowestRateCoinBinance() {
                     element.lowPrice = Number.parseFloat(element.lowPrice);
                     element.highPrice = Number.parseFloat(element.highPrice);
                     element.lastPrice = Number.parseFloat(element.lastPrice);
+                    element.askPrice = Number.parseFloat(element.askPrice);
                     element.quoteVolume = Number.parseFloat(element.quoteVolume);
                     var maxPercentPriceDiff = (element.lowPrice + ((element.lowPrice * 9) / 100)).toFixed(8);
                     maxPercentPriceDiff = Number.parseFloat(maxPercentPriceDiff);
                     if (element.highPrice >= maxPercentPriceDiff) {
                         element.NearAboutLowPrice = (element.lowPrice + ((element.lowPrice * 1) / 100)).toFixed(8);
                         element.NearAboutLowPrice = Number.parseFloat(element.NearAboutLowPrice);
-                        if (element.lastPrice <= element.NearAboutLowPrice) {
+                        if (element.askPrice <= element.NearAboutLowPrice) {
                             newCoinList.push(element);
                         }
                     }
@@ -335,14 +336,14 @@ function getLowestRateCoinBinance() {
             for (var j = 0; j < newCoinList.length; j++) {
                 mailOptions1.subject += newCoinList[j].CoinName;
                 notificationTitle += newCoinList[j].CoinName;
-                mailBody += "Name: " + newCoinList[j].CoinName + " High: " + newCoinList[j].highPrice.toString() + " Low: " + newCoinList[j].lowPrice.toString() + " Last: " + newCoinList[j].lastPrice.toString() + " Volume: " + newCoinList[j].quoteVolume.toString();
-                notificationBody += "<b>" + newCoinList[j].CoinName + "</b>: H: " + newCoinList[j].highPrice.toString() + " Lo: " + newCoinList[j].lowPrice.toString() + " La: " + newCoinList[j].lastPrice.toString() + " V: " + Number.parseInt(newCoinList[j].quoteVolume);
+                mailBody += "" + newCoinList[j].CoinName + ": H: " + newCoinList[j].highPrice.toString().replace(/\b0+/g, "") + " L: " + newCoinList[j].lowPrice.toString().replace(/\b0+/g, "") + " A: " + newCoinList[j].askPrice.toString().replace(/\b0+/g, "") + " V: " + Number.parseInt(newCoinList[j].quoteVolume);
+                notificationBody += "<b>" + newCoinList[j].CoinName + "</b>: H: " + newCoinList[j].highPrice.toString().replace(/\b0+/g, "") + " L: " + newCoinList[j].lowPrice.toString().replace(/\b0+/g, "") + " A: " + newCoinList[j].askPrice.toString().replace(/\b0+/g, "") + " V: " + Number.parseInt(newCoinList[j].quoteVolume);
                 console.log("Name: " + newCoinList[j].CoinName + " High: " + newCoinList[j].highPrice.toString() + " Low: " + newCoinList[j].lowPrice.toString() + " Last: " + newCoinList[j].lastPrice.toString() + " Volume: " + newCoinList[j].quoteVolume.toString() + "\n \n");
                 if (j !== newCoinList.length - 1) {
                     mailOptions1.subject += ", ";
                     notificationTitle += ", ";
                     mailBody += "\n \n";
-                    notificationBody += "<br/> <br/>";
+                    notificationBody += "< br/> <br/>";
                 }
                 if (j == newCoinList.length - 1) {
                     notificationTitle += "  (" + moment().utcOffset("+05:30").format('hh:mm A D MMMM') + ")";
@@ -368,6 +369,7 @@ function getLowestRateCoinBinance() {
                 coin.lowPrice = newCoinList[j].lowPrice;
                 coin.highPrice = newCoinList[j].highPrice;
                 coin.lastPrice = newCoinList[j].lastPrice;
+                coin.askPrice = newCoinList[j].askPrice;
                 coin.volume = newCoinList[j].volume;
                 analysis.lowRateCoins.push(coin);
             }
