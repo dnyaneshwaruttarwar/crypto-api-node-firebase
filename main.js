@@ -357,7 +357,7 @@ function getLowestRateCoinBinanceForUSDT(coins) {
             sendNotification(notificationTitle, mailBody, fcmToken[index]);
         }
     } else {
-        console.log('No: Low Rate coins- USDT');
+        console.log('No: Low Rate coins - USDT');
     }
 
 }
@@ -456,7 +456,7 @@ function getLowestRateCoinBinance() {
                 sendNotification(notificationTitle, mailBody, fcmToken[index]);
             }
         } else {
-            console.log('No: Low Rate coins');
+            console.log('No: Low Rate coins - BTC');
         }
     });
 }
