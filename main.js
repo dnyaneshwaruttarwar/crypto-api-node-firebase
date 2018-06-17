@@ -280,15 +280,15 @@ function getLowestRateCoinBinanceForUSDT(coins) {
                 element.highPrice = Number.parseFloat(element.highPrice);
                 element.lastPrice = Number.parseFloat(element.lastPrice);
                 element.askPrice = Number.parseFloat(element.askPrice);
-                var maxPercentPriceDiff = (element.lowPrice + ((element.lowPrice * 6) / 100)).toFixed(8);
-                maxPercentPriceDiff = Number.parseFloat(maxPercentPriceDiff);
-                if (element.highPrice >= maxPercentPriceDiff) {
-                    element.NearAboutLowPrice = (element.lowPrice + ((element.lowPrice * 2) / 100)).toFixed(8);
-                    element.NearAboutLowPrice = Number.parseFloat(element.NearAboutLowPrice);
-                    if (element.askPrice <= element.NearAboutLowPrice) {
-                        newCoinListForUSDT.push(element);
-                    }
+                // var maxPercentPriceDiff = (element.lowPrice + ((element.lowPrice * 6) / 100)).toFixed(8);
+                // maxPercentPriceDiff = Number.parseFloat(maxPercentPriceDiff);
+                // if (element.highPrice >= maxPercentPriceDiff) {
+                element.NearAboutLowPrice = (element.lowPrice + ((element.lowPrice * 2) / 100)).toFixed(8);
+                element.NearAboutLowPrice = Number.parseFloat(element.NearAboutLowPrice);
+                if (element.askPrice <= element.NearAboutLowPrice) {
+                    newCoinListForUSDT.push(element);
                 }
+                // }
             }
         }
     }
