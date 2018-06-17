@@ -318,6 +318,7 @@ function getLowestRateCoinBinanceForUSDT(coins) {
     }
 
     if (flag) {
+        var mailBody = '';
         var notificationTitle = "Binance-USDT: ";
         var notificationBody = "";
         for (var k = 0; k < newCoinListForUSDT.length; k++) {
@@ -325,9 +326,12 @@ function getLowestRateCoinBinanceForUSDT(coins) {
 
             notificationBody += "<b>" + newCoinListForUSDT[k].CoinName + "</b>: H: " + newCoinListForUSDT[k].highPrice.toString().replace(/\b0+/g, "") + " L: " + newCoinListForUSDT[k].lowPrice.toString().replace(/\b0+/g, "") + " A: " + newCoinListForUSDT[k].askPrice.toString().replace(/\b0+/g, "") + " V: " + newCoinListForUSDT[k].quoteVolume;
 
+            mailBody += "" + newCoinListForUSDT[k].CoinName + ": H: " + newCoinListForUSDT[k].highPrice.toString().replace(/\b0+/g, "") + " L: " + newCoinListForUSDT[k].lowPrice.toString().replace(/\b0+/g, "") + " A: " + newCoinListForUSDT[k].askPrice.toString().replace(/\b0+/g, "") + " V: " + newCoinListForUSDT[k].quoteVolume;
+
             if (k !== newCoinListForUSDT.length - 1) {
                 notificationTitle += ", ";
                 notificationBody += "<br/>";
+                mailBody += "\n \n";
             }
             if (k == newCoinListForUSDT.length - 1) {
                 notificationTitle += "  (" + moment().utcOffset("+05:30").format('hh:mm A D MMMM') + ")";
@@ -417,6 +421,7 @@ function getLowestRateCoinBinance() {
             }
         }
         if (flag) {
+            var mailBody = '';
             var notificationTitle = "Binance-BTC: ";
             var notificationBody = "";
             for (var j = 0; j < newCoinList.length; j++) {
@@ -424,8 +429,11 @@ function getLowestRateCoinBinance() {
 
                 notificationBody += "<b>" + newCoinList[j].CoinName + "</b>: H: " + newCoinList[j].highPrice.toString().replace(/\b0+/g, "") + " L: " + newCoinList[j].lowPrice.toString().replace(/\b0+/g, "") + " A: " + newCoinList[j].askPrice.toString().replace(/\b0+/g, "") + " V: " + Number.parseInt(newCoinList[j].quoteVolume);
 
+                mailBody += "" + newCoinList[j].CoinName + ": H: " + newCoinList[j].highPrice.toString().replace(/\b0+/g, "") + " L: " + newCoinList[j].lowPrice.toString().replace(/\b0+/g, "") + " A: " + newCoinList[j].askPrice.toString().replace(/\b0+/g, "") + " V: " + Number.parseInt(newCoinList[j].quoteVolume);
+
                 if (j !== newCoinList.length - 1) {
                     notificationTitle += ", ";
+                    mailBody += "\n \n";
                     notificationBody += "<br/>";
                 }
                 if (j == newCoinList.length - 1) {
