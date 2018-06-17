@@ -272,7 +272,8 @@ function getLowestRateCoinBinanceForUSDT(coins) {
     for (var i = 0; i < coins.length; i++) {
         var element = coins[i];
         var splitCoin = element.symbol.substr(element.symbol.length - 4);
-        if (splitCoin == 'USDT') {
+        var coinName = element.symbol.replace(splitCoin, '');
+        if (splitCoin == 'USDT' && coinName !== 'TUSD') {
             element.quoteVolume = Number.parseInt(element.quoteVolume);
             if (element.quoteVolume > 1000000) {
                 element.CoinName = element.symbol.replace(splitCoin, '');
