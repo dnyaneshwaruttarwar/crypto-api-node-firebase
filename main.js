@@ -284,7 +284,7 @@ function getLowestRateCoinBinanceForUSDT(coins) {
                 // var maxPercentPriceDiff = (element.lowPrice + ((element.lowPrice * 6) / 100)).toFixed(8);
                 // maxPercentPriceDiff = Number.parseFloat(maxPercentPriceDiff);
                 // if (element.highPrice >= maxPercentPriceDiff) {
-                element.NearAboutLowPrice = (element.lowPrice + ((element.lowPrice * 2) / 100)).toFixed(8);
+                element.NearAboutLowPrice = (element.lowPrice + ((element.lowPrice * 1) / 100)).toFixed(8);
                 element.NearAboutLowPrice = Number.parseFloat(element.NearAboutLowPrice);
                 if (element.askPrice <= element.NearAboutLowPrice) {
                     newCoinListForUSDT.push(element);
